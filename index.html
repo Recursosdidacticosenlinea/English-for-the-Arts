@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>English for the Arts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: a study-planner page. Header with the 5-step route every unit follows, then a filterable grid of unit cards grouped by status. */
+:root{
+  --bg:#f7f4f9; --surface:#ffffff; --ink:#22162e; --muted:#56607a; --line:#e2dae9;
+  --accent:#8a2be2; --accent-soft:#f1e6fc; --gold:#f2b705; --gold-ink:#5c4300;
+  --new:#0f7a5a; --new-soft:#dcf3ea; --soon:#8a5a00; --soon-soft:#fbefd2;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#140f1c; --surface:#1e1729; --ink:#e8ecf6; --muted:#9aa5c0; --line:#3a2f4a;
+  --accent:#c9a0ff; --accent-soft:#33204d; --gold:#f2c23a; --gold-ink:#f2c23a;
+  --new:#5fd3a9; --new-soft:#123a2e; --soon:#f0c062; --soon-soft:#3a2d10; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#140f1c; --surface:#1e1729; --ink:#e8ecf6; --muted:#9aa5c0; --line:#3a2f4a;
+  --accent:#c9a0ff; --accent-soft:#33204d; --gold:#f2c23a; --gold-ink:#f2c23a;
+  --new:#5fd3a9; --new-soft:#123a2e; --soon:#f0c062; --soon-soft:#3a2d10; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.eyebrow{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2rem,5vw,3.1rem);line-height:1.05;margin:.35em 0 .3em;text-wrap:balance}
+h1 span{background:linear-gradient(transparent 62%,var(--gold) 62%,var(--gold) 90%,transparent 90%);padding:0 .08em}
+.lead{max-width:62ch;color:var(--muted);font-size:1.08rem;margin:0}
+h2{font-family:var(--display);font-weight:700;font-size:1.45rem;margin:0;text-wrap:balance}
+/* Route */
+.route{margin-top:32px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.route ol{list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;counter-reset:s}
+.route li{counter-increment:s;position:relative;padding:12px;border-radius:10px;background:var(--bg);min-width:0}
+.route li::before{content:counter(s);font-family:var(--display);font-weight:800;font-size:1.3rem;color:var(--accent);display:block;line-height:1}
+.route b{display:block;margin-top:6px}
+.route small{color:var(--muted);font-size:.86rem;display:block}
+.skills{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.skills i{font-style:normal;font-size:.74rem;padding:1px 7px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:700}
+.evidence{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.evidence div{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;font-size:.9rem;color:var(--muted)}
+.evidence strong{color:var(--ink)}
+/* Controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:40px 0 18px}
+.controls label{font-weight:700;font-size:.9rem}
+#q{flex:1 1 220px;min-width:0;font:inherit;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:.88rem;font-weight:700;padding:7px 13px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+/* Groups & cards */
+.group{margin-top:28px}
+.group-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.group-head .count{color:var(--muted);font-size:.9rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.lvl{font-family:var(--display);font-weight:800;font-size:.82rem;padding:3px 9px;border-radius:6px;background:var(--gold);color:#2b2000;letter-spacing:.02em}
+.status{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:99px}
+.st-ready{background:var(--accent-soft);color:var(--accent)}
+.st-progress{background:var(--new-soft);color:var(--new)}
+.st-planned{background:var(--soon-soft);color:var(--soon)}
+.card h3{font-family:var(--display);font-weight:700;font-size:1.2rem;line-height:1.2;margin:4px 0 0;text-wrap:balance}
+.focus{color:var(--muted);font-size:.93rem;margin:0}
+.subject{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin:0}
+.num{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.8rem;font-weight:700}
+.card .go{margin-top:auto;padding-top:8px}
+.card a.btn{display:inline-block;font-weight:700;text-decoration:none;color:var(--surface);background:var(--accent);padding:8px 14px;border-radius:9px}
+.card a.btn:hover{filter:brightness(1.08)}
+.card .pending{font-size:.88rem;color:var(--muted);font-style:italic}
+.empty{color:var(--muted);padding:20px;border:1px dashed var(--line);border-radius:12px;text-align:center}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
+@media (max-width:760px){.route ol{grid-template-columns:repeat(2,minmax(0,1fr))}.route li:last-child{grid-column:1/-1}.evidence{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){.card{transition:transform .15s ease,border-color .15s}.card:hover{transform:translateY(-2px);border-color:var(--accent)}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Escuela de Artes Plásticas y Audiovisuales · BUAP · English for Specific Purposes · A1–B1</div>
+    <h1>English for <span>the Arts</span></h1>
+    <p class="lead">Practice English with the topics of your degree: Digital Art, Visual Arts and Cinematography. Meet a film crew, describe your studio, design game characters, plan an exhibition, pitch a film and more. Choose a unit, follow the five steps, and check what you can do at the end. Every unit takes about 50–60 minutes.</p>
+  </header>
+
+  <section class="route" aria-labelledby="route-h">
+    <h2 id="route-h">How every unit works</h2>
+    <ol>
+      <li><b>Presentation</b><small>Meet the topic in a real situation.</small></li>
+      <li><b>Objectives</b><small>See what you will be able to do.</small></li>
+      <li><b>Explanation</b><small>Vocabulary, grammar and examples.</small></li>
+      <li><b>Practice</b><small>Four skills:</small><span class="skills"><i>Listening</i><i>Reading</i><i>Writing</i><i>Speaking</i></span></li>
+      <li><b>Self-assessment</b><small>Rate six "I can…" statements from 1 to 5.</small></li>
+    </ol>
+    <div class="evidence">
+      <div><strong>Writing evidence:</strong> write and submit your text directly in the unit.</div>
+      <div><strong>Speaking evidence:</strong> record your task and upload it to your course platform.</div>
+    </div>
+  </section>
+
+  <div class="controls">
+    <label for="q">Find a unit</label>
+    <input id="q" type="search" placeholder="Try “film”, “digital art” or “past”" autocomplete="off">
+    <div class="chips" role="group" aria-label="Filter by level" id="levels"></div>
+  </div>
+
+  <main id="list"></main>
+
+  <footer>Escuela de Artes Plásticas y Audiovisuales · BUAP · English for the Arts · Your progress is saved on this device only.</footer>
+</div>
+
+<script>
+/* ===== Units on the home page =====
+   To add a unit: copy the _template folder, rename it (e.g. "my-new-unit"),
+   edit its data.js, then add one line here with url: "my-new-unit/" and the subject of the degree it connects to.
+   isNew: true shows a "New" label. */
+const UNITS = [
+  {title:"Meet the Crew",            subject:"Cinematography",                         focus:"Verb to be and possessive adjectives to introduce a film crew",        level:"A1", url:"meet-the-crew/"},
+  {title:"My Studio",                subject:"Visual Arts",                            focus:"There is / there are, art materials and prepositions of place",        level:"A1", url:"my-studio/"},
+  {title:"Game On!",                 subject:"Digital Art",                            focus:"Can / can't and adjectives to describe video game characters",         level:"A1", url:"game-on/"},
+  {title:"My Creative Routine",      subject:"All programs",                           focus:"Present simple, adverbs of frequency and time: an artist's week",      level:"A1", url:"my-creative-routine/"},
+  {title:"Art Through Time",         subject:"Art History · All programs",             focus:"Past simple and Wh- questions: the lives of Mexican artists",           level:"A2", url:"art-through-time/"},
+  {title:"Storyboard",               subject:"Cinematography",                         focus:"Present continuous, shot types and sequencers to plan a scene",        level:"A2", url:"storyboard/"},
+  {title:"Level Up",                 subject:"Digital Art",                            focus:"Comparatives, superlatives and (not) as … as to compare tools and games", level:"A2", url:"level-up/"},
+  {title:"Opening Night",            subject:"Visual Arts",                            focus:"Going to for plans, will for offers and predictions; invitations",      level:"A2", url:"opening-night/"},
+  {title:"The Critic's Eye",         subject:"Visual Arts · Art Criticism",            focus:"Present perfect vs. past simple and language to review an artwork",     level:"B1", url:"the-critics-eye/"},
+  {title:"The Pitch",                subject:"Cinematography · Film Production",       focus:"First conditional, unless / as soon as, persuasive language",           level:"B1", url:"the-pitch/"},
+  {title:"Team Pipeline",            subject:"Digital Art · Animation and Games",      focus:"Must, have to, don't have to, mustn't, should in a production team",    level:"B1", url:"team-pipeline/"},
+  {title:"Art in the Community",     subject:"Cultural Management · All programs",     focus:"Passive voice to describe community art projects",                     level:"B1", url:"art-in-the-community/"}
+];
+
+const GROUPS = [
+  {key:"A1", name:"Level A1", note:"First steps"},
+  {key:"A2", name:"Level A2", note:"Everyday professional situations"},
+  {key:"B1", name:"Level B1", note:"Getting independent"}
+];
+const LEVELS = ["All","A1","A2","B1"];
+let level = "All";
+
+const chipsEl = document.getElementById("levels");
+LEVELS.forEach(l=>{
+  const b=document.createElement("button");
+  b.className="chip"; b.type="button"; b.textContent=l; b.id="lvl-"+l;
+  b.setAttribute("aria-pressed", l===level ? "true":"false");
+  b.addEventListener("click",()=>{level=l;[...chipsEl.children].forEach(c=>c.setAttribute("aria-pressed",c.textContent===l?"true":"false"));render();});
+  chipsEl.appendChild(b);
+});
+document.getElementById("q").addEventListener("input",render);
+
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function done(u){ try { const s=JSON.parse(localStorage.getItem("arts:"+u.url.replace(/\/$/,""))||"{}"); return s.self && Object.keys(s.self).length>=6; } catch(e){ return false; } }
+
+function render(){
+  const q=document.getElementById("q").value.trim().toLowerCase();
+  const list=document.getElementById("list"); list.innerHTML="";
+  let shown=0;
+  GROUPS.forEach(g=>{
+    const items=UNITS.map((u,i)=>({...u,n:i+1})).filter(u=>u.level===g.key
+      && (level==="All"||u.level.includes(level))
+      && (!q || (u.title+" "+u.subject+" "+u.focus).toLowerCase().includes(q)));
+    if(!items.length) return;
+    shown+=items.length;
+    const sec=document.createElement("section"); sec.className="group";
+    sec.innerHTML=`<div class="group-head"><h2>${g.name}</h2><span class="count">${g.note} · ${items.length} unit${items.length>1?"s":""}</span></div>`;
+    const grid=document.createElement("div"); grid.className="grid";
+    items.forEach(u=>{
+      const badge = done(u) ? `<span class="status st-progress">Completed</span>` : (u.isNew ? `<span class="status st-planned">New</span>` : "");
+      const go = u.url ? `<a class="btn" href="${esc(u.url)}">Start unit →</a>` : `<span class="pending">Not available yet</span>`;
+      grid.insertAdjacentHTML("beforeend",
+        `<article class="card"><div class="top"><span class="lvl">${u.level}</span>${badge}</div>
+         <p class="subject">${esc(u.subject||"")}</p><h3>${esc(u.title)}</h3><p class="focus">${esc(u.focus)}</p><div class="go">${go}</div></article>`);
+    });
+    sec.appendChild(grid); list.appendChild(sec);
+  });
+  if(!shown) list.innerHTML=`<p class="empty">No units match. Try another word or choose “All”.</p>`;
+}
+render();
+</script>
+</body>
+</html>
